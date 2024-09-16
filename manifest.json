@@ -60,11 +60,17 @@
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
   },
   "browser_specific_settings": {
     "gecko": {
-      "update_url": "https://raw.githubusercontent.com/klas-helper/klas-helper-extension/main/update/manifest.json"
+      "id": "addon@example.com",
+      "strict_min_version": "42.0"
+    },
+    "gecko_android": {
+      "id": "addon@example.com",
+      "strict_min_version": "42.0"
     }
   }
 }
