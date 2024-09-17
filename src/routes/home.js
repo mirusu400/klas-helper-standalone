@@ -95,6 +95,7 @@ export default () => {
                <td>온라인 강의</td>
                <td>과제</td>
                <td>팀 프로젝트</td>
+               <td>퀴즈</td>
              </tr>
            </thead>
            <tbody></tbody>
@@ -132,6 +133,11 @@ export default () => {
             remainingCount: 0,
             totalCount: 0,
           },
+          quiz: {
+            remainingTime: Infinity,
+            remainingCount: 0,
+            totalCount: 0,
+          },
         };
 
         // 온라인 강의를 가져올 주소 설정
@@ -150,6 +156,13 @@ export default () => {
 
         // 팀 프로젝트를 가져올 주소 설정
         promises.push(axios.post('/std/lis/evltn/PrjctStdList.do', {
+          selectSubj: subject.subj,
+          selectYearhakgi: subject.yearhakgi,
+          selectChangeYn: 'Y',
+        }));
+
+        // 퀴즈를 가져올 주소 설정
+        promises.push(axios.post('/std/lis/evltn/AnytmQuizStdPage.do', {
           selectSubj: subject.subj,
           selectYearhakgi: subject.yearhakgi,
           selectChangeYn: 'Y',
@@ -189,7 +202,7 @@ export default () => {
         * 과제 파싱 함수
         * @param {String} subjectCode
         * @param {Object} responseData
-        * @param {String} homeworkType  HW(Personal Homework), TP(Team Project)
+        * @param {String} homeworkType  HW(Personal Homework), TP(Team Project), QZ(Quiz)
         */
       const parseHomework = (subjectCode, responseData, homeworkType = 'HW') => {
         const nowDate = new Date();
@@ -238,6 +251,17 @@ export default () => {
 
             deadline[subjectCode].teamProject.totalCount++;
           }
+          else if (homeworkType === 'QZ') {
+            if (deadline[subjectCode].quiz.remainingTime > hourGap) {
+              deadline[subjectCode].quiz.remainingTime = hourGap;
+              deadline[subjectCode].quiz.remainingCount = 1;
+            }
+            else if (deadline[subjectCode].quiz.remainingTime === hourGap) {
+              deadline[subjectCode].quiz.remainingCount++;
+            }
+
+            deadline[subjectCode].quiz.totalCount++;
+          }
           isExistDeadline = true;
         }
       };
@@ -258,6 +282,10 @@ export default () => {
 
             case '/std/lis/evltn/PrjctStdList.do':
               parseHomework(subjectCode, response.data, 'TP');
+              break;
+
+            case '/std/lis/evltn/AnytmQuizStdPage.do':
+              parseHomework(subjectCode, response.data, 'QZ');
               break;
           }
         }
@@ -324,6 +352,11 @@ export default () => {
              <td>
                <span style="cursor: pointer" onclick="appModule.goLctrumBoard('/std/lis/evltn/PrjctStdPage.do', '${cur.yearSemester}', '${cur.subjectCode}')">
                  ${createContent('팀 프로젝트', cur.teamProject)}
+               <span>
+             </td>
+             <td>
+               <span style="cursor: pointer" onclick="appModule.goLctrumBoard('/std/lis/evltn/AnytmQuizStdPage.do', '${cur.yearSemester}', '${cur.subjectCode}')">
+                 ${createContent('퀴즈', cur.quiz)}
                <span>
              </td>
            </tr>
